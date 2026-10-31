@@ -54,7 +54,7 @@ test('the session remembers which provider served its last reply, for the panel 
     signal: new AbortController().signal,
   });
   assert.equal(result.kind, 'success');
-  assert.match(result.text, /fastcel {2}deepseek\/deepseek-v4\.1-flash-1017/u);
+  assert.equal(result.text.split('\n')[0].trim(), MODEL, 'a bare /fastcel ranks the session model');
   assert.match(result.text, /1 +baseten +220 tok\/s/u);
   assert.match(result.text, /Last reply was served by baseten \(session affinity: skipped below min prefix\)\./u);
 });

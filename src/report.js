@@ -60,7 +60,8 @@ export function formatReport(report, { width = 100, now = Date.now() } = {}) {
 
   const textWidth = Math.max(1, width - INDENT.length);
   const lines = [
-    `${INDENT}${fit(`fastcel${GAP}${modelId}`, textWidth, 'left').trimEnd()}`,
+    // The harness labels command output with the command's name, so the table opens with the model.
+    `${INDENT}${fit(modelId, textWidth, 'left').trimEnd()}`,
     ...wrap(`fastest first · median over the last hour · updated ${ageText(report.fetchedAt, now)}`, textWidth).map(line => `${INDENT}${line}`),
     '',
     `${INDENT}${columns.map((column, at) => fit(column.head, widths[at], column.align)).join(GAP).trimEnd()}`,
