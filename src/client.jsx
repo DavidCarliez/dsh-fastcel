@@ -6,10 +6,10 @@ import styles from './client.css';
 
 export const inject = ['slots', 'connection', 'modelDirectories'];
 
-/** Stats are cached for 15 minutes on the host; polling more often only refreshes the age caption. */
-const POLL_MS = 60_000;
-/** A pick that has not refreshed for this long is hidden rather than shown out of date. */
-const STALE_MS = 3 * POLL_MS;
+/** Stats are cached for 15 minutes on the host, so the pick barely moves between polls. */
+const PICK_POLL_MS = 60_000;
+/** While open, the panel follows replies as they finish, to show which provider served the last one. */
+const PANEL_POLL_MS = 5_000;
 
 /** Shared between the slots: which session's panel is open. */
 function createBridge() {
@@ -67,10 +67,10 @@ function useGeneration(connection) {
 }
 
 /**
- * The ranking for one session's selection, refreshed on a timer and on every change of model or connection.
- * Failures and expired results read as no ranking, so nothing out of date is shown.
+ * The ranking for one session's selection, refreshed every `pollMs` and on every change of model or
+ * connection. Failures and results older than three polls read as no ranking, so nothing out of date is shown.
  */
-function useReport(sessionId, selection, generationId, { refreshToken = 0 } = {}) {
+function useReport(sessionId, selection, generationId, { refreshToken = 0, pollMs = PICK_POLL_MS } = {}) {
   const [record, setRecord] = useState(null);
   const [error, setError] = useState(null);
   const provider = selection?.provider ?? null;
@@ -79,6 +79,8 @@ function useReport(sessionId, selection, generationId, { refreshToken = 0 } = {}
   useEffect(() => {
     setRecord(null);
     setError(null);
+  }, [sessionId, provider, model, generationId]);
+  useEffect(() => {
     if (generationId === null || provider === null || model === null) return undefined;
     const controller = new AbortController();
     let timer;
@@ -95,17 +97,17 @@ function useReport(sessionId, selection, generationId, { refreshToken = 0 } = {}
         setRecord(null);
         setError(failure?.message ?? 'fastcel could not load the ranking.');
       } finally {
-        if (!controller.signal.aborted) timer = setTimeout(poll, POLL_MS);
+        if (!controller.signal.aborted) timer = setTimeout(poll, pollMs);
       }
     };
     poll();
     return () => { controller.abort(); clearTimeout(timer); };
-  }, [sessionId, provider, model, generationId, refreshToken]);
+  }, [sessionId, provider, model, generationId, refreshToken, pollMs]);
   useEffect(() => {
     if (!record) return undefined;
-    const timer = setTimeout(() => setRecord(current => current === record ? null : current), STALE_MS);
+    const timer = setTimeout(() => setRecord(current => current === record ? null : current), 3 * pollMs);
     return () => clearTimeout(timer);
-  }, [record]);
+  }, [record, pollMs]);
   return { value: record?.value ?? null, error, loading: !record && !error && selection !== null && generationId !== null };
 }
 
@@ -156,7 +158,7 @@ function Panel({ connection, sessionId, directory, loadModels }) {
   const selection = useSelection(directory, loadModels);
   const generationId = useGeneration(connection);
   const [refreshToken, setRefreshToken] = useState(0);
-  const { value, error, loading } = useReport(sessionId, selection, generationId, { refreshToken });
+  const { value, error, loading } = useReport(sessionId, selection, generationId, { refreshToken, pollMs: PANEL_POLL_MS });
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { setNow(Date.now()); }, [value]);
   let body;
