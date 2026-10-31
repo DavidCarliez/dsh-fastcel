@@ -212,15 +212,19 @@ export function apply(ctx) {
     id: 'dsh-fastcel-panel',
     inject: () => ({ bridge, connection: ctx.connection, directoryFor }),
   }, PanelHost));
-  ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({
-    name: 'conversation.composer.dock',
-    id: 'dsh-fastcel-pick',
-    order: 3,
-    inject: sessionId => {
-      const directory = directoryFor(sessionId);
-      return { bridge, connection: ctx.connection, sessionId, directory: directory.store, loadModels: directory.load };
-    },
-  }, Pick));
+  // A session shows the pick below its composer; the New Session surface, which has no composer dock,
+  // shows it in the options row above the composer.
+  for (const name of ['conversation.composer.dock', 'conversation.hero.options']) {
+    ctx.slots.inject(name, () => ctx.slots.register({
+      name,
+      id: `dsh-fastcel-pick-${name}`,
+      order: 3,
+      inject: sessionId => {
+        const directory = directoryFor(sessionId);
+        return { bridge, connection: ctx.connection, sessionId, directory: directory.store, loadModels: directory.load };
+      },
+    }, Pick));
+  }
   // A bare `/fastcel` opens the panel here; with an argument it still runs on the host and prints the table.
   ctx.inject(['commandUi'], child => {
     child.effect(() => child.commandUi.decorate({
