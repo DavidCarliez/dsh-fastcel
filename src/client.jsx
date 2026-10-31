@@ -136,18 +136,22 @@ function SpeedBar({ tps, max }) {
 function RankingTable({ value }) {
   const max = Math.max(0, ...value.ranking.map(entry => entry.tps ?? 0));
   return <table className="dfc-table">
-    <thead><tr><th className="dfc-num">#</th><th>Provider</th><th className="dfc-num">Speed</th><th className="dfc-bar-cell"><span className="dfc-visually-hidden">Relative speed</span></th><th className="dfc-num dfc-optional">First token</th><th className="dfc-num dfc-optional">Uptime</th><th className="dfc-note"><span className="dfc-visually-hidden">Note</span></th></tr></thead>
+    <thead><tr><th className="dfc-num">#</th><th>Provider</th><th className="dfc-num">Speed</th><th className="dfc-bar-cell"><span className="dfc-visually-hidden">Relative speed</span></th><th className="dfc-num dfc-optional">First token</th><th className="dfc-num dfc-optional">Uptime</th><th className="dfc-note dfc-optional"><span className="dfc-visually-hidden">Note</span></th></tr></thead>
     <tbody>{value.ranking.map((entry, index) => {
       const state = entry.demotion ? 'demoted' : index === 0 ? 'leader' : 'normal';
       const note = noteText(entry, value.modelId);
       return <tr key={entry.provider} className={`dfc-row-${state}`}>
         <td className="dfc-num dfc-rank">{index + 1}</td>
-        <td className="dfc-provider">{entry.provider}{value.served?.provider === entry.provider && <span className="dfc-tag">last reply</span>}</td>
+        <td className="dfc-provider">
+          {entry.provider}{value.served?.provider === entry.provider && <span className="dfc-tag">last reply</span>}
+          {/* On a narrow screen the note column gives way and the note moves under the provider. */}
+          {note && <span className={`dfc-note-inline ${entry.demotion ? 'dfc-warning' : 'dfc-muted'}`}>{note}</span>}
+        </td>
         <td className="dfc-num dfc-speed">{speedText(entry.tps)}</td>
         <td className="dfc-bar-cell"><SpeedBar tps={entry.tps} max={max} /></td>
         <td className="dfc-num dfc-muted dfc-optional">{firstTokenText(entry.ttftMs)}</td>
         <td className="dfc-num dfc-muted dfc-optional">{uptimeText(entry.uptime15m)}</td>
-        <td className={`dfc-note ${entry.demotion ? 'dfc-warning' : 'dfc-muted'}`}>{note}</td>
+        <td className={`dfc-note dfc-optional ${entry.demotion ? 'dfc-warning' : 'dfc-muted'}`}>{note}</td>
       </tr>;
     })}</tbody>
   </table>;

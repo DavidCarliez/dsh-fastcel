@@ -43,6 +43,7 @@ body[data-ds-dark-theme] .dfc-pick {
 .dfc-bar > span { display: block; height: 100%; border-radius: 3px; background: var(--dfc-accent); }
 .dfc-row-demoted .dfc-bar > span { background: var(--dfc-muted); opacity: .5; }
 .dfc-note { font-size: 11px; }
+.dfc-note-inline { display: none; font-size: 11px; font-weight: 400; }
 .dfc-muted { color: var(--dfc-muted); }
 .dfc-warning { color: var(--dfc-warning); }
 .dfc-tag { display: inline-block; margin-left: 6px; padding: 0 6px; border: 1px solid var(--dfc-border); border-radius: 5px; font-size: 10px; font-weight: 500; line-height: 1.6; color: var(--dfc-muted); vertical-align: 1px; }
@@ -57,8 +58,11 @@ body[data-ds-dark-theme] .dfc-pick {
 .dfc-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (max-width: 600px) {
   .dfc-modal { width: calc(100vw - 16px); max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
+  .dfc-table { font-size: 12px; }
+  .dfc-table th, .dfc-table td { padding: 6px 7px; }
   .dfc-table .dfc-optional { display: none; }
-  .dfc-bar-cell { min-width: 48px; }
+  .dfc-note-inline { display: block; white-space: normal; }
+  .dfc-bar-cell { width: auto; min-width: 36px; }
   .dfc-footer { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) {
