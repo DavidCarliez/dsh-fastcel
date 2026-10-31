@@ -1,0 +1,6 @@
+# Mounts the host plugin. fastcel changes no other entry: it routes requests
+# without touching provider settings, so removing the plugin restores the
+# gateway's own provider choice.
+- insert:
+    - id: dsh-fastcel
+      name: dsh-fastcel
