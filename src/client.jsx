@@ -213,8 +213,10 @@ export function apply(ctx) {
     document.head.append(style);
     return () => style.remove();
   });
-  ctx.slots.inject('shell.bottom', () => ctx.slots.register({
-    name: 'shell.bottom',
+  // `shell.overlay` is the additive frame-wide seat; `shell.bottom` is single and other plugins, such as
+  // ds-cover, already occupy it.
+  ctx.slots.inject('shell.overlay', () => ctx.slots.register({
+    name: 'shell.overlay',
     id: 'dsh-fastcel-panel',
     inject: () => ({ bridge, connection: ctx.connection, directoryFor }),
   }, PanelHost));
